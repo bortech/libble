@@ -5,7 +5,14 @@
 #include "libble.h"
 
 static const char *dev_addr = "84:DD:20:F0:86:AB";
+static const char *keyfob_addr = "84:DD:20:C5:70:43";
 
+#define KEYFOB_BAT_LEVEL 	0x2f
+#define KEYFOB_ENABLE_ACCEL	0x34
+
+#define KEYFOB_ACCEL_X	0x3a
+#define KEYFOB_ACCEL_Y	0x3e
+#define KEYFOB_ACCEL_Z	0x42
 
 int8_t accX, accY, accZ;
 
@@ -15,7 +22,15 @@ double time = 0;
 
 struct timeval t_old, t_new;
 
-uint8_t pps = 200;
+uint8_t pps = 100;
+
+
+uint16_t voltage, dcr, ccr;
+uint16_t dcr0 = 0, ccr0 = 0;
+int state = 0;
+float iacc;
+float rm = 0;
+int rm_delay = 3;
 
 void keyfob_handler(uint16_t handle, uint8_t len, const uint8_t *data)
 {
@@ -52,7 +67,9 @@ void keyfob_handler(uint16_t handle, uint8_t len, const uint8_t *data)
 
 int main(int argc, char **argv)
 {
-	printf("connecting to %s\n", dev_addr);
+	uint16_t bat_level;
+
+	printf("connecting to %s\n", keyfob_addr);
 
 	lble_connect(dev_addr);
 
@@ -85,19 +102,44 @@ int main(int argc, char **argv)
 	printf("setting gyro range...\n");
 	lble_write(0x0028, 1, (uint8_t *)"\x03");
 
-	printf("enabling notifications on mpu6000 data...\n");
-	lble_write(0x002f, 2, (uint8_t *)"\x01\x00");
+//	printf("enabling notifications on mpu6000 data...\n");
+//	lble_write(0x002f, 2, (uint8_t *)"\x01\x00");
 
 	printf("wake up MPU6000...\n");
 	lble_write(0x002b, 1, &pps);
 
-/*	
 	while (1 ) {
-		lble_read(0x33, &bat_level);
-		printf("battery: %d\n", bat_level);
+		lble_read(0x33, (uint8_t *)&bat_level);
+
+		switch (state) {
+			case 0:
+				voltage = bat_level;
+				break;
+			case 1:
+				dcr = bat_level;
+				break;
+			case 2:
+				ccr = bat_level;
+				break;
+		}
+
+
+		iacc = ((ccr - ccr0) - (dcr - dcr0)) / (91.0 * 0.1);
+		rm += iacc;
+		if (rm_delay) {
+			rm_delay--;
+			rm = 0;
+		}
+
+		printf("voltage: %d\tDCR: %d\tCCR: %d\tIACC: %.3f\tRM: %.3f\n", voltage, dcr, ccr, iacc, rm);
+
+		ccr0 = ccr;
+		dcr0 = dcr;
+
+		state++;
+		state %= 3;
 		sleep(1);
 	}
-*/	
 
 	printf("listening for notifications\n");
 	lble_listen(keyfob_handler);
