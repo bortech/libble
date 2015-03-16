@@ -39,10 +39,6 @@ int main(int argc, char **argv)
 	}
 	printf("connection successful\n");
 
-// wait for connection parameters update
-	printf("waiting 1s for connection update...\n");
-	sleep(1);
-
 	printf("enabling notifications for button events...\n");
 	lble_write(VECS_BUTTON_NOTI_CFG, 2, (uint8_t *)"\x01\x00");
 

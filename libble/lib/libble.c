@@ -191,11 +191,12 @@ static void char_read_cb(guint8 status, const guint8 *pdu, guint16 plen, gpointe
 	if (status != 0) {
 		fprintf(stderr, "LBLE::ERROR value read failed: %s\n", att_ecode2str(status));
 		pbuf->len = 0;
-		return;
+		goto done;
 	}
 
 	pbuf->len = dec_read_resp(pdu, plen, pbuf->buffer, plen);
 
+done:
 	g_main_loop_quit(event_loop);
 }
 
@@ -217,13 +218,26 @@ uint8_t lble_read(uint16_t handle, uint8_t *data)
 	return buf.len;
 }
 
+static void char_write_cb(guint8 status, const guint8 *pdu, guint16 plen, gpointer user_data)
+{
+    if (status != 0) {
+		fprintf(stderr, "LBLE::ERROR value write failed: %s\n", att_ecode2str(status));
+		goto done;		
+	}
+
+done:
+    g_main_loop_quit(event_loop);
+}
+
 /* write characteristic by handle */
 void lble_write(uint16_t handle, uint8_t len, uint8_t *data)
 {
 	if (conn_state != STATE_CONNECTED)
 		return;
 
-	if (data != NULL && len > 0)
-		gatt_write_cmd(attrib, handle, data, len, NULL, NULL);
+	if (data != NULL && len > 0) {
+		gatt_write_char(attrib, handle, data, len, char_write_cb, NULL);
+		g_main_loop_run(event_loop);
+	}
 }
 
