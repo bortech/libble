@@ -6,11 +6,13 @@
 
 static const char *dev_addr = "84:DD:20:F0:86:AB";
 
-#define VECS_CHAR_BATT_LEVEL 0x0036
+#define VECS_CHAR_MPU_TEMPERATURE 0x0032
 
 int main(int argc, char **argv)
 {
-	uint8_t bat_level;
+	float temp;	
+	int16_t raw_temp;
+	uint8_t data[2];
 
 	printf("connecting to %s\n", dev_addr);
 	lble_connect(dev_addr);
@@ -20,8 +22,12 @@ int main(int argc, char **argv)
 	}
 	printf("connection successful\n");
 
-	lble_read(VECS_CHAR_BATT_LEVEL, (uint8_t *)&bat_level);
-	printf("battery: %d%%\n", bat_level);
+	lble_read(VECS_CHAR_MPU_TEMPERATURE, data);
+
+	raw_temp = (data[0] << 8) | data[1];
+	temp = raw_temp / 340.0 + 35.0;
+
+	printf("temperature: %.1f *C\n", temp);
 
 	lble_disconnect();
 	return 0;

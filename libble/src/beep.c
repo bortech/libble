@@ -6,7 +6,7 @@
 
 static const char *dev_addr = "84:DD:20:F0:86:AB";
 
-#define VECS_CHAR_BEEP_REQUEST	0x003c
+#define VECS_CHAR_BEEP_REQUEST	0x003f
 
 int main(int argc, char **argv)
 {

@@ -17,7 +17,7 @@ CPPFLAGS += -I$(BLUEZ_PATH)/attrib -I$(BLUEZ_PATH) -I$(BLUEZ_PATH)/lib -I$(BLUEZ
 CPPFLAGS += `pkg-config glib-2.0 --cflags`
 LDLIBS += `pkg-config glib-2.0 --libs`
 
-all: libble.so motion  battery button beep 
+all: libble.so motion battery button beep temp
 
 libble.so: $(LIB_SRCS) $(IMPORT_SRCS)
 	$(CC) -shared -L. $(CFLAGS) $(CPPFLAGS) -fPIC -o $@ $(LIB_SRCS) $(IMPORT_SRCS) $(LDLIBS)
@@ -34,6 +34,9 @@ button: src/button.c
 beep: src/beep.c
 	$(CC) -L. -Wl,-rpath=. -Wall -I./lib -o $@ $< -lble
 
+temp: src/temp.c
+	$(CC) -L. -Wl,-rpath=. -Wall -I./lib -o $@ $< -lble
+
 clean:
-	rm -f libble.so motion battery button beep
+	rm -f libble.so motion battery button beep temp
 

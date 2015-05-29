@@ -38,12 +38,12 @@ void notify_handler(uint16_t handle, uint8_t len, const uint8_t *data)
 		mpu_data[i] |= data[(i << 1) + 1];
 	}
 
-	printf("[0x%04x] accelX: %6d accelY: %6d accelZ: %6d temp: %6d gyroX: %6d gyroY: %6d gyroZ: %6d PPS: %.0f Hz\n",
+	printf("[0x%04x] accelX: %6d accelY: %6d accelZ: %6d idx: %6d gyroX: %6d gyroY: %6d gyroZ: %6d PPS: %.0f Hz\n",
 														handle,
 														mpu_data[0],
 														mpu_data[1],
 														mpu_data[2],
-														mpu_data[3] / 340 + 35,
+														(uint16_t)mpu_data[3],
 														mpu_data[4],
 														mpu_data[5],
 														mpu_data[6], 

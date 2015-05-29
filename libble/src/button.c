@@ -4,8 +4,8 @@
 
 #include "libble.h"
 
-#define VECS_BUTTON_NOTI_VAL	0x0038
-#define VECS_BUTTON_NOTI_CFG	0x0039
+#define VECS_BUTTON_NOTI_VAL	0x003b
+#define VECS_BUTTON_NOTI_CFG	0x003c
 
 static const char *vecs_addr = "84:DD:20:F0:86:AB";
 
